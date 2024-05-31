@@ -34,8 +34,9 @@ if __name__ == "__main__":
 
     num_active_orbitals = 6
     num_active_electrons = 8
-    n_vqe_layers = 1
+
     spin = 0
+    charge = 0
     optimizer_type = "cudaq"
 
     atom = "systems/O2_spin_0/geo.xyz"
@@ -43,7 +44,8 @@ if __name__ == "__main__":
     ipie_input_dir = "test_mwe"
     chkptfile_rohf = "scf_mwe.chk"
     os.makedirs(ipie_input_dir, exist_ok=True)
-    charge = 0
+
+    n_vqe_layers = 1
 
     mol = gto.M(
         atom=atom,
@@ -85,13 +87,11 @@ if __name__ == "__main__":
 
     n_qubits = 2 * num_active_orbitals
 
-    empty_orbitals = num_active_orbitals - ((num_active_electrons // 2) + (num_active_electrons % 2))
+    # n_alpha = int((num_active_electrons + spin) / 2)
+    # n_beta = int((num_active_electrons - spin) / 2)
 
-    n_alpha = int((num_active_electrons + spin) / 2)
-    n_beta = int((num_active_electrons - spin) / 2)
-
-    n_alpha_vec = np.array([1] * n_alpha + [0] * (num_active_orbitals - n_alpha))
-    n_beta_vec = np.array([1] * n_beta + [0] * (num_active_orbitals - n_beta))
+    n_alpha_vec = np.array([1] * nocca_act + [0] * (num_active_orbitals - nocca_act))
+    n_beta_vec = np.array([1] * noccb_act + [0] * (num_active_orbitals - noccb_act))
     init_mo_occ = (n_alpha_vec + n_beta_vec).tolist()
 
     options = {'maxiter': 50000,
@@ -115,3 +115,8 @@ if __name__ == "__main__":
     print(f"# Best energy {energy_optimized}")
     print(f"# VQE time {time_end - time_start}")
     print(vqe.get_state_vector(results['best_parameters']))
+    final_state_vector = results["state_vec"]
+
+    from src.input_ipie import get_coeff_wf
+
+    print(get_coeff_wf(final_state_vector, (nocca_act, noccb_act)))
