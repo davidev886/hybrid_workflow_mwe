@@ -70,6 +70,12 @@ def get_coeff_wf(final_state_vector, n_elec, ncore_electrons=None, thres=1e-6):
     occas = [np.array(core + [o + ncore for o in oa]) for oa in occas]
     occbs = [np.array(core + [o + ncore for o in ob]) for ob in occbs]
 
+    coeff = np.array(coeff, dtype=complex)
+    ixs = np.argsort(np.abs(coeff))[::-1]
+    coeff = coeff[ixs]
+    occas = np.array(occas)[ixs]
+    occbs = np.array(occbs)[ixs]
+
     return coeff, occas, occbs
 
 

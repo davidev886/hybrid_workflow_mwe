@@ -43,6 +43,7 @@ if __name__ == "__main__":
     basis = "cc-pVQZ"
     ipie_input_dir = "test_mwe"
     chkptfile_rohf = "scf_mwe.chk"
+    file_chk = os.path.join(ipie_input_dir, chkptfile_rohf)
     os.makedirs(ipie_input_dir, exist_ok=True)
 
     n_vqe_layers = 1
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     nocca, noccb = mol.nelec
     mf = scf.ROHF(mol)
     print("# saving chkfile to", os.path.join(ipie_input_dir, chkptfile_rohf))
-    mf.chkfile = os.path.join(ipie_input_dir, chkptfile_rohf)
+    mf.chkfile = file_chk
     mf.kernel()
 
     my_casci = mcscf.CASCI(mf, num_active_orbitals, num_active_electrons)
@@ -102,21 +103,40 @@ if __name__ == "__main__":
 
     print("# init_mo_occ", init_mo_occ)
     print("# layers", n_vqe_layers)
-    time_start = time.time()
-    vqe = VqeQnp(n_qubits=n_qubits,
-                 n_layers=n_vqe_layers,
-                 init_mo_occ=init_mo_occ,
-                 target=target)
+    if 0 :
+        time_start = time.time()
+        vqe = VqeQnp(n_qubits=n_qubits,
+                     n_layers=n_vqe_layers,
+                     init_mo_occ=init_mo_occ,
+                     target=target)
 
-    results = vqe.run_vqe_cudaq(hamiltonian_cudaq, options=options)
-    energy_optimized = results['energy_optimized']
+        results = vqe.run_vqe_cudaq(hamiltonian_cudaq, options=options)
+        energy_optimized = results['energy_optimized']
 
-    time_end = time.time()
-    print(f"# Best energy {energy_optimized}")
-    print(f"# VQE time {time_end - time_start}")
-    print(vqe.get_state_vector(results['best_parameters']))
-    final_state_vector = results["state_vec"]
+        time_end = time.time()
+        print(f"# Best energy {energy_optimized}")
+        print(f"# VQE time {time_end - time_start}")
+        print(results["state_vec"])
+        final_state_vector = results["state_vec"]
+
+    final_state_vector = np.loadtxt("o2_wf.dat")
 
     from src.input_ipie import get_coeff_wf
 
-    print(get_coeff_wf(final_state_vector, (nocca_act, noccb_act)))
+    coeff, occas, occbs = get_coeff_wf(final_state_vector,
+                                       (self.n_alpha, self.n_beta))
+
+    # Need to write wavefunction to checkpoint file.
+    with h5py.File(file_chk, "r+") as fh5:
+        fh5["mcscf/ci_coeffs"] = coeff
+        fh5["mcscf/occs_alpha"] = occa
+        fh5["mcscf/occs_beta"] = occb
+
+    # generate input file for ipie
+    from ipie.utils.from_pyscf import gen_ipie_input_from_pyscf_chk
+    gen_ipie_input_from_pyscf_chk(file_chk,
+                                  mcscf=True,
+                                  chol_cut=1e-1)
+
+    # look at minimal_afqmc
+
