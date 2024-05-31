@@ -10,6 +10,8 @@ from openfermion import generate_hamiltonian
 import time
 from src.vqe_cudaq_qnp import VqeQnp
 from src.utils_cudaq import get_cudaq_hamiltonian
+import h5py
+
 
 # from pyscf import gto, scf, fci, ao2mo, mcscf, lib
 # import sys
@@ -22,7 +24,7 @@ from src.utils_cudaq import get_cudaq_hamiltonian
 # from openfermion.linalg import get_sparse_operator
 # from src.spin_square import of_spin_operator
 # from openfermion.hamiltonians import s_squared_operator
-# import h5py
+
 # from collections import defaultdict
 # import pandas as pd
 # import pickle
@@ -31,7 +33,7 @@ from src.utils_cudaq import get_cudaq_hamiltonian
 if __name__ == "__main__":
     np.random.seed(12)
     target = "nvidia"
-
+    do_vqe = False
     num_active_orbitals = 6
     num_active_electrons = 8
 
@@ -103,8 +105,9 @@ if __name__ == "__main__":
 
     print("# init_mo_occ", init_mo_occ)
     print("# layers", n_vqe_layers)
-    if 0 :
-        time_start = time.time()
+
+    time_start = time.time()
+    if do_vqe:
         vqe = VqeQnp(n_qubits=n_qubits,
                      n_layers=n_vqe_layers,
                      init_mo_occ=init_mo_occ,
@@ -118,19 +121,19 @@ if __name__ == "__main__":
         print(f"# VQE time {time_end - time_start}")
         print(results["state_vec"])
         final_state_vector = results["state_vec"]
-
-    final_state_vector = np.loadtxt("o2_wf.dat")
+    else:
+        final_state_vector = np.loadtxt("o2_wf.dat")
 
     from src.input_ipie import get_coeff_wf
 
     coeff, occas, occbs = get_coeff_wf(final_state_vector,
-                                       (self.n_alpha, self.n_beta))
+                                       (nocca_act, noccb_act))
 
     # Need to write wavefunction to checkpoint file.
     with h5py.File(file_chk, "r+") as fh5:
         fh5["mcscf/ci_coeffs"] = coeff
-        fh5["mcscf/occs_alpha"] = occa
-        fh5["mcscf/occs_beta"] = occb
+        fh5["mcscf/occs_alpha"] = occas
+        fh5["mcscf/occs_beta"] = occbs
 
     # generate input file for ipie
     from ipie.utils.from_pyscf import gen_ipie_input_from_pyscf_chk
@@ -139,4 +142,3 @@ if __name__ == "__main__":
                                   chol_cut=1e-1)
 
     # look at minimal_afqmc
-
