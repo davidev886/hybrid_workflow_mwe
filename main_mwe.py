@@ -8,8 +8,6 @@ from pyscf import gto, scf, ao2mo, mcscf
 from openfermion.transforms import jordan_wigner
 from openfermion import generate_hamiltonian
 import time
-from src.vqe_cudaq_qnp import VqeQnp
-from src.utils_cudaq import get_cudaq_hamiltonian
 import h5py
 
 
@@ -33,13 +31,16 @@ import h5py
 if __name__ == "__main__":
     np.random.seed(12)
     target = "nvidia"
+    optimizer_type = "cudaq"
+
     do_vqe = False
     num_active_orbitals = 6
     num_active_electrons = 8
 
     spin = 0
     charge = 0
-    optimizer_type = "cudaq"
+    nocca_act = (num_active_electrons + spin) // 2
+    noccb_act = (num_active_electrons - spin) // 2
 
     atom = "systems/O2_spin_0/geo.xyz"
     basis = "cc-pVQZ"
@@ -63,51 +64,50 @@ if __name__ == "__main__":
     mf.chkfile = file_chk
     mf.kernel()
 
-    my_casci = mcscf.CASCI(mf, num_active_orbitals, num_active_electrons)
-    nocca_act = (num_active_electrons + spin) // 2
-    noccb_act = (num_active_electrons - spin) // 2
-    ss = (mol.spin / 2 * (mol.spin / 2 + 1))
-    my_casci.fix_spin_(ss=ss)
-
-    e_tot, e_cas, fcivec, mo_output, mo_energy = my_casci.kernel()
-
-    print('# FCI Energy in CAS:', e_tot)
-
-    h1, energy_core = my_casci.get_h1eff()
-    h2 = my_casci.get_h2eff()
-    h2_no_symmetry = ao2mo.restore('1', h2, num_active_orbitals)
-    tbi = np.asarray(h2_no_symmetry.transpose(0, 2, 3, 1), order='C')
-
-    mol_ham = generate_hamiltonian(h1, tbi, energy_core.item(), EQ_TOLERANCE=1e-8)
-    jw_hamiltonian = jordan_wigner(mol_ham)
-
-    print("# Target", target)
-
-    start = time.time()
-    hamiltonian_cudaq, energy_core = get_cudaq_hamiltonian(jw_hamiltonian)
-    end = time.time()
-    print("# Time for preparing the cudaq hamiltonian:", end - start)
-
-    n_qubits = 2 * num_active_orbitals
-
-    # n_alpha = int((num_active_electrons + spin) / 2)
-    # n_beta = int((num_active_electrons - spin) / 2)
-
-    n_alpha_vec = np.array([1] * nocca_act + [0] * (num_active_orbitals - nocca_act))
-    n_beta_vec = np.array([1] * noccb_act + [0] * (num_active_orbitals - noccb_act))
-    init_mo_occ = (n_alpha_vec + n_beta_vec).tolist()
-
-    options = {'maxiter': 50000,
-               'optimizer_type': optimizer_type,
-               'energy_core': energy_core,
-               'initial_parameters': None,
-               'return_final_state_vec': True}
-
-    print("# init_mo_occ", init_mo_occ)
-    print("# layers", n_vqe_layers)
-
-    time_start = time.time()
     if do_vqe:
+        from src.vqe_cudaq_qnp import VqeQnp
+        from src.utils_cudaq import get_cudaq_hamiltonian
+
+        my_casci = mcscf.CASCI(mf, num_active_orbitals, num_active_electrons)
+        ss = (mol.spin / 2 * (mol.spin / 2 + 1))
+        my_casci.fix_spin_(ss=ss)
+
+        e_tot, e_cas, fcivec, mo_output, mo_energy = my_casci.kernel()
+
+        print('# FCI Energy in CAS:', e_tot)
+
+        h1, energy_core = my_casci.get_h1eff()
+        h2 = my_casci.get_h2eff()
+        h2_no_symmetry = ao2mo.restore('1', h2, num_active_orbitals)
+        tbi = np.asarray(h2_no_symmetry.transpose(0, 2, 3, 1), order='C')
+
+        mol_ham = generate_hamiltonian(h1, tbi, energy_core.item(), EQ_TOLERANCE=1e-8)
+        jw_hamiltonian = jordan_wigner(mol_ham)
+
+        print("# Target", target)
+
+        start = time.time()
+        hamiltonian_cudaq, energy_core = get_cudaq_hamiltonian(jw_hamiltonian)
+        end = time.time()
+        print("# Time for preparing the cudaq hamiltonian:", end - start)
+
+        n_qubits = 2 * num_active_orbitals
+
+        n_alpha_vec = np.array([1] * nocca_act + [0] * (num_active_orbitals - nocca_act))
+        n_beta_vec = np.array([1] * noccb_act + [0] * (num_active_orbitals - noccb_act))
+        init_mo_occ = (n_alpha_vec + n_beta_vec).tolist()
+
+        options = {'maxiter': 50000,
+                   'optimizer_type': optimizer_type,
+                   'energy_core': energy_core,
+                   'initial_parameters': None,
+                   'return_final_state_vec': True}
+
+        print("# init_mo_occ", init_mo_occ)
+        print("# layers", n_vqe_layers)
+
+        time_start = time.time()
+
         vqe = VqeQnp(n_qubits=n_qubits,
                      n_layers=n_vqe_layers,
                      init_mo_occ=init_mo_occ,
