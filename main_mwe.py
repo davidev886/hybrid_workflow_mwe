@@ -122,7 +122,7 @@ if __name__ == "__main__":
         print(results["state_vec"])
         final_state_vector = results["state_vec"]
     else:
-        final_state_vector = np.loadtxt("o2_wf.dat")
+        final_state_vector = np.loadtxt("o2_wf.dat", dtype=np.complex_)
 
     from src.input_ipie import get_coeff_wf
 
