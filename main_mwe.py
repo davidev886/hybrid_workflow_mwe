@@ -134,7 +134,7 @@ if __name__ == "__main__":
         from ipie.hamiltonians.generic import Generic as HamGeneric
         from ipie.qmc.afqmc import AFQMC
         from ipie.systems.generic import Generic
-        from ipie.trial_wavefunction.particle_hole import ParticleHoleNonChunked
+        from ipie.trial_wavefunction.particle_hole import ParticleHole
         from ipie.utils.from_pyscf import gen_ipie_input_from_pyscf_chk
 
         from src.input_ipie import get_coeff_wf
@@ -179,7 +179,7 @@ if __name__ == "__main__":
             occb = fh5["occ_beta"][:]
 
         wavefunction = (coeff, occa, occb)
-        trial = ParticleHoleNonChunked(
+        trial = ParticleHole(
             wavefunction,
             mol_nelec,
             num_basis,
