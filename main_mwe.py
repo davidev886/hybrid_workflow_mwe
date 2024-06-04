@@ -127,7 +127,7 @@ if __name__ == "__main__":
         final_state_vector = np.loadtxt("o2_wf.dat", dtype=np.complex_)
 
     if do_afqmc:
-        import cupy
+        # import cupy
         from ipie.config import config
         config.update_option("use_gpu", True)
 
