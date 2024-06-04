@@ -8,24 +8,6 @@ from pyscf import gto, scf, ao2mo, mcscf
 import time
 import h5py
 
-
-# from pyscf import gto, scf, fci, ao2mo, mcscf, lib
-# import sys
-# import pickle
-# import json
-# from pyscf.lib import chkfile
-# from pyscf.scf.chkfile import dump_scf
-# from ipie.utils.from_pyscf import gen_ipie_input_from_pyscf_chk
-# import shutil
-# from openfermion.linalg import get_sparse_operator
-# from src.spin_square import of_spin_operator
-# from openfermion.hamiltonians import s_squared_operator
-
-# from collections import defaultdict
-# import pandas as pd
-# import pickle
-# import json
-
 if __name__ == "__main__":
     np.random.seed(12)
     target = "nvidia"
@@ -68,7 +50,7 @@ if __name__ == "__main__":
         from openfermion.transforms import jordan_wigner
         from openfermion import generate_hamiltonian
         from src.vqe_cudaq_qnp import VqeQnp
-        from src.utils_cudaq import get_cudaq_hamiltonian
+        from src.vqe_cudaq_qnp import get_cudaq_hamiltonian
 
         my_casci = mcscf.CASCI(mf, num_active_orbitals, num_active_electrons)
         ss = (mol.spin / 2 * (mol.spin / 2 + 1))
@@ -121,9 +103,9 @@ if __name__ == "__main__":
         time_end = time.time()
         print(f"# Best energy {energy_optimized}")
         print(f"# VQE time {time_end - time_start}")
-        print(results["state_vec"])
         final_state_vector = results["state_vec"]
     else:
+        print(f"# Loading state vec from file ...")
         final_state_vector = np.loadtxt("o2_wf.dat", dtype=np.complex_)
 
     if do_afqmc:
@@ -137,7 +119,7 @@ if __name__ == "__main__":
         from ipie.trial_wavefunction.particle_hole import ParticleHole
         from ipie.utils.from_pyscf import gen_ipie_input_from_pyscf_chk
 
-        from src.input_ipie import get_coeff_wf
+        from src.utils_ipie import get_coeff_wf
 
         coeff, occas, occbs = get_coeff_wf(final_state_vector,
                                            ncore_electrons=0,
