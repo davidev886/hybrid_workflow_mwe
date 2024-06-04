@@ -2,15 +2,12 @@
     Contains the class with the VQE using the quantum-number-preserving ansatz
 """
 import numpy as np
-
-from src.utils_cudaq import buildOperatorMatrix
-import pandas as pd
-
 import cudaq
 from cudaq import spin as spin_op
 import openfermion as of
 from openfermion.hamiltonians import s_squared_operator
 from openfermion.transforms import jordan_wigner
+
 
 class VqeQnp(object):
     """
@@ -138,7 +135,7 @@ class VqeQnp(object):
 
     def get_coeff_wf_ipie(self, param_list):
         """
-            :returns: Input for ipie trial: coefficients, list of occupied alpha, list of occupied bets
+            :returns: state vector computed with parameter param_list
         """
         kernel, thetas = self.layers()
         state = convert_state_big_endian(np.array(cudaq.get_state(kernel, param_list), dtype=complex))
@@ -189,17 +186,10 @@ class VqeQnp(object):
             total_opt_energy = energy_optimized + energy_core
             callback_energies = [en + energy_core for en in callback_energies]
 
-            info_final_state = dict()
             print("# Num Params:", self.num_params)
             print("# Qubits:", self.n_qubits)
             print("# N_layers:", self.n_layers)
             print("# Energy after the VQE:", total_opt_energy)
-
-            info_final_state["total_opt_energy"] = total_opt_energy
-
-            df = pd.DataFrame(info_final_state, index=[0])
-            df.to_csv(f'{self.system_name}_info_final_state_{self.n_layers}_layers_opt_{optimizer_type}.csv',
-                      index=False)
 
             result = {"energy_optimized": total_opt_energy,
                       "best_parameters": best_parameters,
@@ -212,19 +202,6 @@ class VqeQnp(object):
         else:
             print(f"# Optimizer {optimizer_type} not implemented")
             exit()
-
-    def compute_energy(self, hamiltonian, params):
-        """
-            For checking the energy at the end - not used for the VQE
-        """
-        kernel, thetas = self.layers()
-
-        exp_val = cudaq.observe(kernel,
-                                hamiltonian,
-                                params).expectation()
-        print("# Parameters", params)
-        print("# Energy from vqe", exp_val)
-        return exp_val
 
 
 def convert_state_big_endian(state_little_endian):
