@@ -133,14 +133,6 @@ class VqeQnp(object):
         state = convert_state_big_endian(np.array(cudaq.get_state(kernel, param_list), dtype=complex))
         return state
 
-    def get_coeff_wf_ipie(self, param_list):
-        """
-            :returns: state vector computed with parameter param_list
-        """
-        kernel, thetas = self.layers()
-        state = convert_state_big_endian(np.array(cudaq.get_state(kernel, param_list), dtype=complex))
-        return state
-
     def run_vqe_cudaq(self, hamiltonian, options=None):
         """
         Run VQE
