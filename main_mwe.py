@@ -5,8 +5,6 @@ Contains the main file for running a complete VQE + AFQMC
 import os
 import numpy as np
 from pyscf import gto, scf, ao2mo, mcscf
-from openfermion.transforms import jordan_wigner
-from openfermion import generate_hamiltonian
 import time
 import h5py
 
@@ -67,6 +65,8 @@ if __name__ == "__main__":
     mf.kernel()
 
     if do_vqe:
+        from openfermion.transforms import jordan_wigner
+        from openfermion import generate_hamiltonian
         from src.vqe_cudaq_qnp import VqeQnp
         from src.utils_cudaq import get_cudaq_hamiltonian
 
