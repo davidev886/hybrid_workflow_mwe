@@ -18,8 +18,7 @@ class VqeQnp(object):
                  n_qubits,
                  n_layers,
                  init_mo_occ=None,
-                 target="nvidia",
-                 system_name="FeNTA"):
+                 target="nvidia"):
         self.n_qubits = n_qubits
         self.n_layers = n_layers
         self.number_of_Q_blocks = n_qubits // 2 - 1
@@ -30,10 +29,9 @@ class VqeQnp(object):
         self.best_vqe_energy = None
         self.target = target
         self.initial_x_gates_pos = self.prepare_initial_circuit()
-
-        self.spin_s_square = buildOperatorMatrix("total", n_qubits)
-        self.spin_s_z = buildOperatorMatrix("projected", n_qubits)
-        self.system_name = system_name
+        # self.spin_s_square = buildOperatorMatrix("total", n_qubits)
+        # self.spin_s_z = buildOperatorMatrix("projected", n_qubits)
+        # self.system_name = system_name
 
     def prepare_initial_circuit(self):
         """

@@ -23,7 +23,7 @@ if __name__ == "__main__":
     nocca_act = (num_active_electrons + spin) // 2
     noccb_act = (num_active_electrons - spin) // 2
 
-    atom = "systems/O2_spin_0/geo.xyz"
+    atom = "systems/FeNTA_spin_1/geo.xyz"
     basis = "cc-pVQZ"
     ipie_input_dir = "test_mwe"
     chkptfile_rohf = "scf_mwe.chk"
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     nocca, noccb = mol.nelec
     mol_nelec = mol.nelec
     mf = scf.ROHF(mol)
-    print("# saving chkfile to", os.path.join(ipie_input_dir, chkptfile_rohf))
+    print(f"# saving chkfile to {file_chk}")
     mf.chkfile = file_chk
     mf.kernel()
 
@@ -104,12 +104,13 @@ if __name__ == "__main__":
         print(f"# Best energy {energy_optimized}")
         print(f"# VQE time {time_end - time_start}")
         final_state_vector = results["state_vec"]
+        print(f"# Saving state vec to file ...")
+        np.savetxt("wave_function.dat", final_state_vector)
     else:
         print(f"# Loading state vec from file ...")
-        final_state_vector = np.loadtxt("o2_wf.dat", dtype=np.complex_)
+        final_state_vector = np.loadtxt("wave_function.dat", dtype=np.complex_)
 
     if do_afqmc:
-        # import cupy
         from ipie.config import config
         config.update_option("use_gpu", True)
 
