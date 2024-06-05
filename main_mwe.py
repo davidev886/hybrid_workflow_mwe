@@ -15,10 +15,10 @@ if __name__ == "__main__":
 
     do_vqe = False
     do_afqmc = True
-    num_active_orbitals = 6
-    num_active_electrons = 8
+    num_active_orbitals = 5
+    num_active_electrons = 5
 
-    spin = 0
+    spin = 1
     charge = 0
     nocca_act = (num_active_electrons + spin) // 2
     noccb_act = (num_active_electrons - spin) // 2
