@@ -15,15 +15,15 @@ if __name__ == "__main__":
 
     do_vqe = False
     do_afqmc = True
-    num_active_orbitals = 5
-    num_active_electrons = 5
+    num_active_orbitals = 6
+    num_active_electrons = 8
 
-    spin = 1
+    spin = 0
     charge = 0
     nocca_act = (num_active_electrons + spin) // 2
     noccb_act = (num_active_electrons - spin) // 2
 
-    atom = "systems/FeNTA_spin_1/geo.xyz"
+    atom = "systems/O3_spin_0/geo.xyz"
     basis = "cc-pVQZ"
     ipie_input_dir = "test_mwe"
     chkptfile_rohf = "scf_mwe.chk"
