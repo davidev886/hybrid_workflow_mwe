@@ -137,7 +137,7 @@ if __name__ == "__main__":
         from ipie.utils.from_pyscf import gen_ipie_input_from_pyscf_chk
         gen_ipie_input_from_pyscf_chk(file_chk,
                                       mcscf=True,
-                                      chol_cut=1e-5)
+                                      chol_cut=1e-1)
 
         with h5py.File("hamiltonian.h5") as fa:
             chol = fa["LXmn"][()]
@@ -179,7 +179,7 @@ if __name__ == "__main__":
             trial,
             num_walkers=100,
             num_steps_per_block=25,
-            num_blocks=10,
+            num_blocks=4,
             timestep=0.005,
             stabilize_freq=5,
             seed=96264512,
@@ -188,3 +188,4 @@ if __name__ == "__main__":
         )
         afqmc_msd.run()
         afqmc_msd.finalise(verbose=True)
+        print(afqmc_msd.estimators)
