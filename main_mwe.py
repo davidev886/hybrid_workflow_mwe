@@ -123,7 +123,6 @@ if __name__ == "__main__":
         from src.utils_ipie import get_coeff_wf
 
         coeff, occas, occbs = get_coeff_wf(final_state_vector,
-                                           ncore_electrons=0,
                                            n_elec=(nocca_act, noccb_act)
                                            )
 
