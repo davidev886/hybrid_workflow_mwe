@@ -45,9 +45,6 @@ class VqeQnp(object):
         self.best_vqe_energy = None
         self.target = target
         self.initial_x_gates_pos = self.prepare_initial_circuit()
-        # self.spin_s_square = buildOperatorMatrix("total", n_qubits)
-        # self.spin_s_z = buildOperatorMatrix("projected", n_qubits)
-        # self.system_name = system_name
 
     def prepare_initial_circuit(self):
         """
@@ -242,6 +239,7 @@ def get_cudaq_hamiltonian(jw_hamiltonian):
     """
 
     hamiltonian_cudaq = 0.0
+    energy_core = 0.0
     for ham_term in jw_hamiltonian:
         [(operators, ham_coeff)] = ham_term.terms.items()
         if len(operators):
@@ -255,51 +253,6 @@ def get_cudaq_hamiltonian(jw_hamiltonian):
         hamiltonian_cudaq += cuda_operator
 
     return hamiltonian_cudaq, energy_core
-
-
-def buildOperatorMatrix(name: str, n_qubits):
-    """The name can either be: number, alpha, beta, projected or total.
-        return a cuda quantum operator
-    """
-
-    operator = of.FermionOperator()
-
-    if name == "number":
-        for i in range(n_qubits):
-            operator += of.FermionOperator(
-                '{index}^ {index}'.format(index=i, ))
-
-    elif name == "alpha":
-        for i in range(n_qubits):
-            if i % 2 == 0:
-                operator += of.FermionOperator(
-                    '{index}^ {index}'.format(index=i, ))
-
-    elif name == "beta":
-        for i in range(n_qubits):
-            if i % 2 == 1:
-                operator += of.FermionOperator(
-                    '{index}^ {index}'.format(index=i, ))
-
-    elif name == "projected":
-        alpha_number_operator = of.FermionOperator()
-        beta_number_operator = of.FermionOperator()
-
-        for i in range(n_qubits):
-            if i % 2 == 0:
-                alpha_number_operator += of.FermionOperator(
-                    '{index}^ {index}'.format(index=i, ))
-            elif i % 2 == 1:
-                beta_number_operator += of.FermionOperator(
-                    '{index}^ {index}'.format(index=i, ))
-        operator = 1 / 2 * (alpha_number_operator - beta_number_operator)
-
-    elif name == "total":
-        operator = s_squared_operator(n_spatial_orbitals=n_qubits // 2)
-
-    jw_operator = jordan_wigner(operator)
-    cudaq_op = get_cudaq_operator(jw_operator)
-    return cudaq_op
 
 
 def get_cudaq_operator(jw_hamiltonian):
