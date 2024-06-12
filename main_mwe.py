@@ -94,7 +94,8 @@ if __name__ == "__main__":
 
         vqe = VqeQnp(n_qubits=n_qubits,
                      n_layers=n_vqe_layers,
-                     init_mo_occ=init_mo_occ,
+                     num_active_electrons=num_active_electrons,
+                     spin=spin,
                      target=target)
 
         results = vqe.run_vqe_cudaq(hamiltonian_cudaq, options=options)

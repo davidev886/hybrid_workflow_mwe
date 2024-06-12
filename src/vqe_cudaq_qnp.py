@@ -11,18 +11,34 @@ from openfermion.transforms import jordan_wigner
 
 class VqeQnp(object):
     """
-        Implements the quantum-number-preserving ansatz proposed by Anselmetti et al. NJP 23 (2021)
+        Implements the quantum-number-preserving ansatz from Anselmetti et al. NJP 23 (2021)
     """
 
     def __init__(self,
                  n_qubits,
                  n_layers,
-                 init_mo_occ=None,
+                 num_active_electrons,
+                 spin,
                  target="nvidia"):
         self.n_qubits = n_qubits
         self.n_layers = n_layers
         self.number_of_Q_blocks = n_qubits // 2 - 1
         self.num_params = 2 * self.number_of_Q_blocks * n_layers
+
+        num_active_orbitals = n_qubits // 2
+
+        # number of alpha and beta electrons in the active space
+        num_active_electrons_alpha = (num_active_electrons + spin) // 2
+        num_active_electrons_beta = (num_active_electrons - spin) // 2
+
+        # Define the initial state for the VQE as a list
+        # [n_1, n_2, ....]
+        # where n_j=(0,1,2) is the occupation of j-th the orbital
+
+        n_alpha_vec = [1] * num_active_electrons_alpha + [0] * (num_active_orbitals - num_active_electrons_alpha)
+        n_beta_vec = [1] * num_active_electrons_beta + [0] * (num_active_orbitals - num_active_electrons_beta)
+        init_mo_occ = [n_a + n_b for n_a, n_b in zip(n_alpha_vec, n_beta_vec)]
+
         self.init_mo_occ = init_mo_occ
         self.final_state_vector_best = None
         self.best_vqe_params = None
@@ -137,7 +153,7 @@ class VqeQnp(object):
         """
         mpi_support = options.get("mpi_support", False)
         return_final_state_vec = options.get("return_final_state_vec", False)
-        
+
         if mpi_support:
             cudaq.mpi.initialize()
             print('# mpi is initialized? ', cudaq.mpi.is_initialized())
