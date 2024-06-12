@@ -12,7 +12,7 @@ def signature_permutation(orbital_list):
     Returns the signature of the permutation in orbital_list
     """
     if len(orbital_list) == 1:
-        return True
+        return 1
 
     transposition_count = 0
     for index, element in enumerate(orbital_list):
