@@ -16,14 +16,13 @@ class VqeQnp(object):
 
     def __init__(self,
                  n_qubits,
-                 n_layers,
                  num_active_electrons,
                  spin,
                  options):
         self.n_qubits = n_qubits
-        self.n_layers = n_layers
+        self.n_layers = options.get('n_vqe_layers', 1)
         self.number_of_Q_blocks = n_qubits // 2 - 1
-        self.num_params = 2 * self.number_of_Q_blocks * n_layers
+        self.num_params = 2 * self.number_of_Q_blocks * self.n_layers
         self.options = options
         num_active_orbitals = n_qubits // 2
 
@@ -43,7 +42,7 @@ class VqeQnp(object):
         self.final_state_vector_best = None
         self.best_vqe_params = None
         self.best_vqe_energy = None
-        self.target = target
+        self.target = "nvidia"
         self.initial_x_gates_pos = self.prepare_initial_circuit()
 
     def prepare_initial_circuit(self):
