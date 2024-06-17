@@ -19,12 +19,12 @@ class VqeQnp(object):
                  n_layers,
                  num_active_electrons,
                  spin,
-                 target="nvidia"):
+                 options):
         self.n_qubits = n_qubits
         self.n_layers = n_layers
         self.number_of_Q_blocks = n_qubits // 2 - 1
         self.num_params = 2 * self.number_of_Q_blocks * n_layers
-
+        self.options = options
         num_active_orbitals = n_qubits // 2
 
         # number of alpha and beta electrons in the active space
@@ -144,12 +144,13 @@ class VqeQnp(object):
         state = convert_state_big_endian(np.array(cudaq.get_state(kernel, param_list), dtype=complex))
         return state
 
-    def run_vqe_cudaq(self, hamiltonian, options=None):
+    def run_vqe_cudaq(self, hamiltonian):
         """
         Run VQE
         """
+        options = self.options
         mpi_support = options.get("mpi_support", False)
-        return_final_state_vec = options.get("return_final_state_vec", False)
+        return_final_state_vec = options.get("return_final_state_vec", True)
 
         if mpi_support:
             cudaq.mpi.initialize()
