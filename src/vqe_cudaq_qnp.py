@@ -150,7 +150,7 @@ class VqeQnp(object):
         """
         options = self.options
         mpi_support = options.get("mpi_support", False)
-        return_final_state_vec = options.get("return_final_state_vec", True)
+        return_final_state_vec = options.get("return_final_state_vec", False)
 
         if mpi_support:
             cudaq.mpi.initialize()
